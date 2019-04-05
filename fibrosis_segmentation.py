@@ -66,7 +66,9 @@ def findBlueAndRed(whiteMask,redMask,blueMask,otherMask,HSV,RGB):
     labels[blueMask] = 1
 
     whereWhite = np.where(whiteMask)
-    whiteIdx = np.random.randint(0, len(whereWhite[0]), (np.sum(redMask)+np.sum(blueMask))//4)
+    numColor = np.sum(redMask)+np.sum(blueMask)
+    numWhite = int(numColor*settings.frac_white/(1-settings.frac_white))
+    whiteIdx = np.random.randint(0, len(whereWhite[0]), numWhite)
     labels[whereWhite[0][whiteIdx],whereWhite[1][whiteIdx]] = 2
 
     HSVflat = np.reshape(RGB, (RGB.shape[0]*RGB.shape[1],3))

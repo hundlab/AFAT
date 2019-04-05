@@ -8,7 +8,7 @@ import numpy as np
 def createColorMasks(HSV, RGB):
     whiteMask = (HSV[...,1] <= 0.06) & (HSV[...,2] >= 0.8)
     redMask = (0.745 < HSV[...,0]) & (HSV[...,0] < 1) & np.logical_not(whiteMask)
-    blueMask = (0.549 < HSV[...,0]) & (HSV[...,0] < 0.706) & (HSV[...,1] >= .1) & np.logical_not(whiteMask)
+    blueMask = (0.549 < HSV[...,0]) & (HSV[...,0] < 0.706) & (HSV[...,1] >= 0) & np.logical_not(whiteMask)
     otherMask = np.logical_not(whiteMask|blueMask|redMask)
 
     return whiteMask, redMask, blueMask, otherMask
@@ -31,6 +31,13 @@ stdevMultiplier : float = 2
 # minimum fraction of neighbors with the same label needed to classify a pixel
 #default 1 or 100% of neighbors must be the same
 min_consensus : float = 1
+
+# fraction of the sample used for training the KNN to be white
+# this is used becase if all white values were taken it would take prohibitively
+# long so instead a random sample of white values are added in
+# increase this to decrease the variability in results
+# should be in the range [0,1)
+frac_white : float = 0.2
 
 ###############################################################################
 # other settings
