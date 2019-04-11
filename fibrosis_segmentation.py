@@ -50,7 +50,7 @@ def findWhite(whiteMask,redMask,blueMask,otherMask,HSV):
 
 #segement out blue and red from other/unkown
 #this uses KNN to predict the color label for unkown pixels
-def findBlueAndRed(whiteMask,redMask,blueMask,otherMask,HSV,RGB):
+def findBlueAndRed(whiteMask,redMask,blueMask,otherMask,LAB):
     def getWeights(dists):
         weights = np.zeros_like(dists)
         for i in range(dists.shape[0]):
@@ -61,7 +61,7 @@ def findBlueAndRed(whiteMask,redMask,blueMask,otherMask,HSV,RGB):
                     weights[i,j] = 1
         return weights
 
-    labels = np.ones(shape=(HSV.shape[0],HSV.shape[1]))*-1
+    labels = np.ones(shape=(LAB.shape[0],LAB.shape[1]))*-1
     labels[redMask] = 0
     labels[blueMask] = 1
 
@@ -71,7 +71,7 @@ def findBlueAndRed(whiteMask,redMask,blueMask,otherMask,HSV,RGB):
     whiteIdx = np.random.randint(0, len(whereWhite[0]), numWhite)
     labels[whereWhite[0][whiteIdx],whereWhite[1][whiteIdx]] = 2
 
-    HSVflat = np.reshape(RGB, (RGB.shape[0]*RGB.shape[1],3))
+    HSVflat = np.reshape(LAB, (LAB.shape[0]*LAB.shape[1],3))
     labelsFlat = labels.flatten()
 
     whereCat = np.where(labelsFlat != -1)[0]

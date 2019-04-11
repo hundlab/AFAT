@@ -114,15 +114,25 @@ def plotOne(filename, data):
 #process one file, dividing the file into blue (fibrosis), red (tissue), white, and unclassified
 def processOne(RGB):
     HSV = color.rgb2hsv(RGB)
+    LAB = color.rgb2lab(RGB)
+
+#    test = LAB.copy()
+#    test[...,0] = test[...,0]/100
+#    test[...,1] = (test[...,1]-test[...,1].min())/(test[...,1].max()-test[...,1].min())
+#    test[...,2] = (test[...,2]-test[...,2].min())/(test[...,2].max()-test[...,2].min())
+#    print(LAB[...,1].max(),LAB[...,1].min())
+#    print(LAB[...,2].max(),LAB[...,2].min())
+#    plt.figure()
+#    plt.imshow(test)
 
     #apply color filters
     whiteMask1, redMask1, blueMask1, otherMask1 = createColorMasks(HSV, RGB)
-    otherwhiteMask = findWhite(whiteMask1,redMask1,blueMask1,otherMask1,HSV)
+    otherwhiteMask = findWhite(whiteMask1,redMask1,blueMask1,otherMask1,LAB)
     otherMask = otherMask1 & np.logical_not(otherwhiteMask)
     whiteMask = whiteMask1 | otherwhiteMask
 
     #catagorize other
-    otherredMask, otherblueMask, otherotherMask = findBlueAndRed(whiteMask,redMask1,blueMask1,otherMask,HSV,RGB)
+    otherredMask, otherblueMask, otherotherMask = findBlueAndRed(whiteMask,redMask1,blueMask1,otherMask,LAB)
 
     redMask = redMask1 | otherredMask
     blueMask = blueMask1 | otherblueMask
