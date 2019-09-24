@@ -11,4 +11,5 @@
     with the command `python setup.py install`. Alternatively install these 
     dependancies: matplotlib, scipy, numpy, scikit-image, scikit-learn, Tkinter.
 3. To run MAT either use the command `python 'Automated Fibrosis Analysis Toolkit.py'`
-    or double-click on *Macrophage Analysis Toolkit.py* from the file explorer.
+    or double-click on *Automated Fibrosis Analysis Toolkit.py* from the file
+    explorer.
