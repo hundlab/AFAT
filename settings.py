@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
-min_blue_saturation = 0
+min_blue_saturation = 0*255
 
 ###############################################################################
 # this function creates the color masks
@@ -12,9 +12,9 @@ def createColorMasks(HSV, RGB):
 #    redMask = (LAB[...,1] > 10) & (LAB[...,2] > 0) & np.logical_not(whiteMask)
 #    blueMask = (LAB[...,2] < 0) & (LAB[...,1] < 15) & np.logical_not(whiteMask) & np.logical_not(redMask)
 
-    whiteMask = (HSV[...,1] <= 0.06) & (HSV[...,2] >= 0.8)
-    redMask = (0.76 < HSV[...,0]) & (HSV[...,0] < 1) & np.logical_not(whiteMask)
-    blueMask = (0.69 < HSV[...,0]) & (HSV[...,0] < 0.72) & (HSV[...,1] >= min_blue_saturation) & np.logical_not(whiteMask)
+    whiteMask = (HSV[...,1] <= 0.06*255) & (HSV[...,2] >= 0.8*255)
+    redMask = (0.78*255 < HSV[...,0]) & (HSV[...,0] < 1*255) & np.logical_not(whiteMask)
+    blueMask = (0.69*255 < HSV[...,0]) & (HSV[...,0] < 0.72*255) & (HSV[...,1] >= min_blue_saturation) & np.logical_not(whiteMask)
     otherMask = np.logical_not(whiteMask|blueMask|redMask)
 
     return whiteMask, redMask, blueMask, otherMask
@@ -27,7 +27,7 @@ def createColorMasks(HSV, RGB):
 
 #raw settings for KNeighborsClassifier
 #see https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html#sklearn.neighbors.KNeighborsClassifier
-KNN : dict = {'n_neighbors':5}
+KNN : dict = {'n_neighbors':5, 'n_jobs':-1}
 
 # dont classify points if the color is very different from red, blue or white
 useWeights : bool = False
@@ -38,12 +38,17 @@ stdevMultiplier : float = 2
 #default 1 or 100% of neighbors must be the same
 min_consensus : float = 0.8
 
-# fraction of the sample used for training the KNN to be white
+# fraction of the number of colored pixels
 # this is used becase if all white values were taken it would take prohibitively
 # long so instead a random sample of white values are added in
 # increase this to decrease the variability in results
-# should be in the range [0,1)
-frac_white : float = 0.2
+# should be greater than 0
+frac_white : float = 0.25
+frac_blue : float = 0.95
+frac_red : float = 0.75
+
+max_blue : int = 500000
+max_red : int = 1000000
 
 ###############################################################################
 # other settings
@@ -55,5 +60,5 @@ show_firstPass = False
 save_images = True
 
 # show image plots
-show_images = True
+show_images = False
 ###############################################################################

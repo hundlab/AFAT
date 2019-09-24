@@ -27,7 +27,7 @@ def whiteVsColor(whiteMask,colorMask,otherMask,HSV):
     HSVflatOther = HSVflat[whereOther,:]
     HSVflatCat = HSVflat[whereCat,:]
 
-    regress = lm.LinearRegression()
+    regress = lm.LinearRegression(n_jobs=-1)
     #regress = lm.Lars()
     regress.fit(HSVflatCat,labelsFlatCat)
     pred = regress.predict(HSVflatOther)
@@ -37,6 +37,7 @@ def whiteVsColor(whiteMask,colorMask,otherMask,HSV):
     whereOther2D = np.where(otherMask)
     otherwhiteMask = otherMask.copy()
     otherwhiteMask[whereOther2D[0][pred_round!=0],whereOther2D[1][pred_round!=0]] = False
+
     return otherwhiteMask
 
 #segement out the white from other/unknown
@@ -61,14 +62,23 @@ def findBlueAndRed(whiteMask,redMask,blueMask,otherMask,LAB):
                     weights[i,j] = 1
         return weights
 
-    labels = np.ones(shape=(LAB.shape[0],LAB.shape[1]))*-1
-    labels[redMask] = 0
-    labels[blueMask] = 1
-
+    whereBlue = np.where(blueMask)
+    whereRed = np.where(redMask)
     whereWhite = np.where(whiteMask)
-    numColor = np.sum(redMask)+np.sum(blueMask)
-    numWhite = int(numColor*settings.frac_white/(1-settings.frac_white))
+
+    numBlue = int(settings.frac_blue*len(whereBlue[0]))
+    numBlue = numBlue if numBlue < settings.max_blue else settings.max_blue
+    numRed = int(settings.frac_red*len(whereRed[0]))
+    numRed = numRed if numRed < settings.max_red else settings.max_red
+    numWhite = int((numRed+numBlue)*settings.frac_white)
+
+    blueIdx = np.random.randint(0, len(whereBlue[0]), numBlue)
+    redIdx = np.random.randint(0, len(whereRed[0]), numRed)
     whiteIdx = np.random.randint(0, len(whereWhite[0]), numWhite)
+
+    labels = np.ones(shape=(LAB.shape[0],LAB.shape[1]))*-1
+    labels[whereRed[0][redIdx], whereRed[1][redIdx]] = 0
+    labels[whereBlue[0][blueIdx], whereBlue[1][blueIdx]] = 1
     labels[whereWhite[0][whiteIdx],whereWhite[1][whiteIdx]] = 2
 
     HSVflat = np.reshape(LAB, (LAB.shape[0]*LAB.shape[1],3))

@@ -12,7 +12,7 @@ install_requires = [
 
 setup(name='AFAT',
       version='1.0',
-      desciption='A tool to quantify the amount of fibrosis in Masson’s Trichrome stains',
+      description='A tool to quantify the amount of fibrosis in Masson’s Trichrome stains',
       author='Thomas Hund',
       author_email='hund.1@osu.edu',
       install_requires=install_requires
