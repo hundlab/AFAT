@@ -23,6 +23,7 @@
 5. To run AFAT either double-click on *Automated Fibrosis Analysis Toolkit.py* from
     the file explorer or open the command prompt/powershell as directed in (3) and
     run `py 'Automated Fibrosis Analysis Toolkit.py'`.
+
 *Note that it may take a few seconds for AFAT to start.*
 
 ### Mac/Linux
