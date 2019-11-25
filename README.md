@@ -5,7 +5,7 @@
     downloaded from python.org. The x86-64 executable installer is reccommended,
     as the default install configuration will set python to open .py files by 
     double clicking. If it is installed correctly opening a cmd or powershell 
-    window and typing py should start a python prompt.
+    window and typing `py` and pressing enter should start a python prompt.
     ![](./images/command_prompt_py.png)
 2. Download AFAT either by using git to clone the repository, or with the download button.
     Be sure to download all files.
@@ -17,8 +17,7 @@
     ![](./images/file_explorer_open_cmd.png)
 4.  From the prompt window, to install the dependencies run the command 
     `py -m pip install -r requirements.txt`. Alternatively install these 
-    dependencies: matplotlib, scipy, scikit-image, scikit-learn, xlrd, xlsxwriter,
-    numpy, PyQt5, pillow.
+    dependencies: matplotlib, scipy, numpy, scikit-image, scikit-learn, Tkinter.
     ![](./images/command_prompt_install.png)
 5. To run AFAT either double-click on *Automated Fibrosis Analysis Toolkit.py* from
     the file explorer or open the command prompt/powershell as directed in (3) and
