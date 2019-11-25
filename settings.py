@@ -60,5 +60,5 @@ show_firstPass = False
 save_images = True
 
 # show image plots
-show_images = False
+show_images = True
 ###############################################################################
