@@ -4,17 +4,27 @@
 import os
 from setuptools import setup
 
-install_requires = [
-'matplotlib',
-'scipy',
-'scikit-image',
-'sklearn']
+version = '1.0'
 
-setup(name='AFAT',
-      version='1.0',
-      description='A tool to quantify the amount of fibrosis in Masson’s Trichrome stains',
-      author='Thomas Hund',
-      author_email='hund.1@osu.edu',
-      install_requires=install_requires
-      )
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
+with open("requirements.txt", "r", encoding="utf-8") as fh: 
+     install_requires = fh.read().splitlines()
+
+
+setup(name='hundlab-AFAT',
+    package_dir={'':'src'},
+    packages=['AFAT'],
+    scripts=['src/AutomatedFibrosisAnalysisToolkit.py'],
+    version=version,
+    description='Automated Fibrosis Analysis Toolkit: A tool to quantify the amount of fibrosis in Masson’s Trichrome stains',
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/hundlab/MAT",
+    author='Daniel Gratz',
+    author_email='hund.1@osu.edu',
+    install_requires=install_requires,
+    include_package_data=True,
+    )
 

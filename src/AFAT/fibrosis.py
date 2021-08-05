@@ -14,9 +14,9 @@ import numpy as np
 from skimage import io, color, img_as_float, img_as_uint
 from PIL import Image
 
-import settings
-from settings import createColorMasks
-from fibrosis_segmentation import findBlueAndRed, findWhite
+from . import settings
+from .settings import createColorMasks
+from .fibrosis_segmentation import findBlueAndRed, findWhite
 
 #covers everything not selected by the mask and plots it
 def showMask(im,mask,name):

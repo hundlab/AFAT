@@ -1,38 +1,57 @@
 # Automated Fibrosis Analysis Toolkit (AFAT)
+
+*This tool was documented in [our paper](http://doi.org/10.1016/j.mex.2019.11.028) on marcophage and fibrosis quantification*
+
+*Hundlab Website: [hundlab.org](http://hundlab.org/)*
+
+*PyPI: [pypi.org/project/hundlab-AFAT](https://pypi.org/project/hundlab-AFAT/)*
+
+
+*Github: [github.com/hundlab/MAT](https://github.com/hundlab/AFAT)*
+
+
 ## Setup
+
 ### Windows
-1. Python 3.7.5 will need to be installed prior to setting up AFAT. Python 3.7.5 can be 
-    downloaded from python.org. The x86-64 executable installer is reccommended,
-    as the default install configuration will set python to open .py files by 
-    double clicking. If it is installed correctly opening a cmd or powershell 
-    window and typing `py` and pressing enter should start a python prompt.
-    ![](./images/command_prompt_py.png)
-2. Download AFAT either by using git to clone the repository, or with the download button.
-    Be sure to download all files.
-    ![](./images/website_download.png)
-3. Open a terminal window in the folder where AFAT has been downloaded.
-    This can also be achieved by opening the AFAT folder in File Explorer,
-    Right Clicking + Shift, and selecting 'Open Powershell here' or 'Open 
-    Command Prompt here'.
-    ![](./images/file_explorer_open_cmd.png)
-4.  From the prompt window, to install the dependencies run the command 
-    `py -m pip install -r requirements.txt`. Alternatively install these 
-    dependencies: matplotlib, scipy, numpy, scikit-image, scikit-learn, Tkinter.
-    ![](./images/command_prompt_install.png)
-5. To run AFAT either double-click on *Automated Fibrosis Analysis Toolkit.py* from
-    the file explorer or open the command prompt/powershell as directed in (3) and
-    run `py 'Automated Fibrosis Analysis Toolkit.py'`.
+
+1. Python 3 will need to be installed prior to setting up AFAT, preferably any python
+    greater than 3.7. Python 3 can be downloaded from the [python website](http://python.org).
+    The x86-64 executable installer is reccommended, as the default install configuration 
+    will set python to open .py files by double clicking. If it is installed correctly opening
+    cmd or powershell window and typing `py --version` will print the installed python
+    version.
+
+2.  Install AFAT by opening a cmd or powershell window and running
+    `py -m pip install hundlab-AFAT`, this should install AFAT and all of its dependancies.
+
+3.  Once AFAT has been installed it can be run via cmd, powershell or the start menu. To run
+     type `AutomatedFibrosisAnalysisToolkit.py`. To create a desktop shortcut type
+     `AutomatedFibrosisAnalysisToolkit.py` into the start menu select `Copy full path`, then on the 
+     Desktop `right-click` -> `new` -> `new shortcut` and paste the path when it askes for a
+     path.
+
+     If AFAT does not run above as described this means that the python scipts directory has
+     not been added to the windows path. To find the install location of python type 
+     `py -0p` this will give the location of the python executable. In the same directory
+     as python.exe, is a Scripts directory and the `AutomatedFibrosisAnalysisToolkit.py` will
+     be in there. Once the AFAT script has been found, a shortcut can be made to it directly
+     and placed on the desktop.
 
 *Note that it may take a few seconds for AFAT to start.*
 
 ### Mac/Linux
+
 1. Python 3 will need to be installed prior to setting up AFAT. Python 3 can be 
     installed via your package manager in linux, or downloaded from python.org for mac.
-    If it is installed correctly opening a terminal and typing python (in some 
-    distributions such as Ubuntu the command is python3) should start a python prompt.
-2. From a terminal window navigate to the folder where AFAT has been downloaded. 
-    From there run the command `pip install -r requirements.txt`. Alternatively 
-    install these dependencies: matplotlib, scipy, numpy, scikit-image, scikit-learn,
-    Tkinter.
-3. To run MAT either use the command `python 'Automated Fibrosis Analysis Toolkit.py'` or
-    double-click on *Automated Fibrosis Analysis Toolkit.py* from the file explorer.
+    If it is installed correctly opening a terminal and typing `python --version` (in some 
+    distributions such as Ubuntu the command is `python3`) should start a python prompt. It 
+    may also be necessary to install Tkinter. On unbuntu the package is `python3-tk`.
+
+2. Install AFAT using pip: `python -m pip install hundlab-AFAT`
+
+3. To run AFAT use the command `AutomatedFibrosisAnalysisToolkit.py`
+
+## Usage
+
+TODO!! For now see the paper.
+

@@ -3,7 +3,7 @@
 
 if __name__ == "__main__":
     try:
-        from fibrosis import main
+        from AFAT.fibrosis import main
         main()
         input('Press Enter to continue ...')
     except Exception as e:

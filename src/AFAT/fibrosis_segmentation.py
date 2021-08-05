@@ -10,7 +10,7 @@ import sklearn.linear_model as lm
 import sklearn.neighbors as nei
 import numpy as np
 
-import settings
+from . import settings
 
 #categorize white pixes in other/unknown given the pixes which are white and
 #colored from the rest of the image
