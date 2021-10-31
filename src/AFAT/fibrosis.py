@@ -4,207 +4,233 @@
 Blue Fibrosis Analysis
 
 This file contains the body of loading analyzing and saving the images
-for the specific algorithms see fibrosis_analysis.py and settings.py
+for the specific algorithms see fibrosis_analysis.py and for
+settings and colo profiles see settings.yaml and color_rules.yaml
 """
 
+
 import matplotlib.pyplot as plt
-import tkinter as tk
-from tkinter import filedialog
 import numpy as np
-from skimage import io, color, img_as_float, img_as_uint
-from PIL import Image
+from skimage import color #io, img_as_float, img_as_uint
+import yaml
 
 from . import settings
-from .settings import createColorMasks
-from .fibrosis_segmentation import findBlueAndRed, findWhite
+from .fibrosis_segmentation import createColorMasks, findStainAndTissue, findWhite
+from .gui.plot_masked_images import showMask, coverUnMasked, beautify
+from .tools import openImage
 
-#covers everything not selected by the mask and plots it
-def showMask(im,mask,name):
-    plt.title(name)
-    plt.axis('off')
-    plt.imshow(coverUnMasked(im,mask))
+#gethers user input and processes all files, saving and ploting as requested
+def processAllFiles(image_filepaths, 
+                    save_res_filepath, 
+                    save_images_dirpath,
+                    color_rules_filepath=None):
 
-#covers everything not selected by the mask
-def coverUnMasked(im,mask):
-    im_copy = img_as_uint(im)
-    im_copy[np.logical_not(mask),:] = 0
-    return im_copy
+    if len(image_filepaths) == 0:
+        print("No Image Files Provided")
+        return
 
-#increases the saturation to 100% for everything selected by the mask
-def beautify(colorMask, HSV):
-    im_copy = HSV.copy()
-    im_copy[colorMask,1] = 255
-    return im_copy
+    savefile = None
+    if save_res_filepath != '':
+        savefile = open(save_res_filepath, 'w')
+        savefile.write(('file name, % fibrosis, Tissue count filter, '
+                        'stain count filter, background count filter, '
+                        'other count filter, background count regression, '
+                        'Tissue count KNN, stain count KNN, background count KNN, '
+                        'other count KNN, Tissue count final, stain count final, '
+                        'background count final, other count final\n'))
 
-#dummy class to have the data dynamically assigned to it
-class Data(object):
-    pass
+    if color_rules_filepath is not None:
+        with open(color_rules_filepath, 'r') as stream:
+            color_rules = yaml.safe_load(stream)
+            color_rules = color_rules['color_rules']
+    else:
+        color_rules = settings['color_rules']
+
+    if settings['save_settings'] and save_res_filepath != '':
+        settings_filepath = '/'.join(save_res_filepath.split('/')[:-1]+['settings.yaml'])
+        settings_cpy = settings.copy()
+        settings_cpy.update(dict(color_rules=color_rules))
+        with open(settings_filepath, 'w') as file:
+            yaml.dump(settings_cpy, file)
+
+    for filepath in image_filepaths:
+        im = openImage(filepath)
+
+        filename = filepath.split('/')[-1]
+        data = processOne(im, color_rules)
+
+        if savefile is not None:
+            savefile.write((
+                    '{filename}, {precStainVTissue},'
+                    '{tissueFilter}, {stainFilter}, {whiteFilter}, {otherFilter},'
+                    '{whiteReg},'
+                    '{tissueKNN}, {stainKNN}, {whiteKNN}, {otherKNN},'
+                    '{tissueFinal}, {stainFinal}, {whiteFinal}, {otherFinal}\n')\
+                    .format(filename=filename,
+                            precStainVTissue=data['precStainVTissue'],
+                            **data['colorCounts']))
+                
+        printTextOne(filename, data)
+        if settings['show_images']:
+            plotOne(filename, data, im)
+        if settings['save_images'] and save_images_dirpath != '':
+            saveOne(filename, save_images_dirpath, data, im)
+#    plt.show()
+    if savefile is not None:
+        savefile.close()
+
+
+#process one file, dividing the file into stain, 
+# tissue, background (white), and unclassified
+def processOne(im, color_rules):
+    RGB = np.asarray(im.convert('RGB'))
+    RGB_flat = RGB.reshape((RGB.shape[0]*RGB.shape[1], 3))
+    uniq_rgb, uniq_inv, uniq_counts = np.unique(RGB_flat, 
+                                                return_inverse=True,
+                                                return_counts=True,
+                                                axis=0)
+    
+    uniq_hsv = np.squeeze(color.rgb2hsv(uniq_rgb[np.newaxis, ...]))
+    uniq_hsv = (uniq_hsv*255).astype('uint8')
+    
+    uniq_lab = np.squeeze(color.rgb2lab(uniq_rgb[np.newaxis, ...]))
+
+#   beware! LAB space is float and can take up lots of memory    
+#    LAB = color.rgb2lab(RGB)
+
+    #apply color filters
+    whiteMaskFilter, tissueMaskFilter, stainMaskFilter, otherMaskFilter = createColorMasks(uniq_hsv, color_rules)
+    
+    whiteMaskReg = findWhite(whiteMaskFilter,
+                               tissueMaskFilter,
+                               stainMaskFilter,
+                               otherMaskFilter,
+                               uniq_lab)
+    otherMask = otherMaskFilter & np.logical_not(whiteMaskReg)
+
+    #catagorize other
+    stainMaskKNN, tissueMaskKNN, whiteMaskKNN, otherMaskKNN =\
+        findStainAndTissue(whiteMaskReg,
+                       tissueMaskFilter,
+                       stainMaskFilter,
+                       otherMask,
+                       uniq_lab)
+
+    tissueMaskFlat = tissueMaskKNN[uniq_inv]
+    stainMaskFlat = stainMaskKNN[uniq_inv]
+    whiteMaskFlat = whiteMaskKNN[uniq_inv]
+    otherMaskFlat = otherMaskKNN[uniq_inv]
+    
+    tissueMask = tissueMaskFlat.reshape((RGB.shape[0], RGB.shape[1]))
+    stainMask = stainMaskFlat.reshape((RGB.shape[0], RGB.shape[1]))
+    whiteMask = whiteMaskFlat.reshape((RGB.shape[0], RGB.shape[1]))
+    otherMask = otherMaskFlat.reshape((RGB.shape[0], RGB.shape[1]))
+   
+    colorCounts = dict(tissueFinal=np.sum(tissueMask),
+                       stainFinal=np.sum(stainMask),
+                       whiteFinal=np.sum(whiteMask),
+                       otherFinal=np.sum(otherMask),
+                       tissueFilter=np.sum(tissueMaskFilter.astype(int)*uniq_counts),
+                       stainFilter=np.sum(stainMaskFilter.astype(int)*uniq_counts),
+                       whiteFilter=np.sum(whiteMaskFilter.astype(int)*uniq_counts),
+                       otherFilter=np.sum(otherMaskFilter.astype(int)*uniq_counts),
+                       whiteReg=np.sum(whiteMaskReg.astype(int)*uniq_counts),
+                       stainKNN=np.sum(stainMaskKNN.astype(int)*uniq_counts),
+                       tissueKNN=np.sum(tissueMaskKNN.astype(int)*uniq_counts),
+                       whiteKNN=np.sum(whiteMaskKNN.astype(int)*uniq_counts),
+                       otherKNN=np.sum(otherMaskKNN.astype(int)*uniq_counts),
+                   )
+    # Calculate the area of the tissue pixels
+    tissuecount = np.sum(tissueMask)
+    staincount = np.sum(stainMask)
+    precStainVTissue=100*(staincount/(staincount+tissuecount))
+
+    data = dict(
+        tissueMask = tissueMask,
+        stainMask = stainMask,
+        whiteMask = whiteMask,
+        otherMask = otherMask,
+        colorCounts = colorCounts,
+        precStainVTissue = precStainVTissue
+        )
+    return data
 
 #prints the summary text from the analysis of one file
 def printTextOne(filename, data):
-    print(filename)
-    print('Pixels counts:')
-    print('\tPass 1: Red: {red1}, Blue: {blue1}, White: {white1}, Other: {other1}'.format(**data.colorCounts))
-    print('\tFinal: Red: {red2}, Blue: {blue2}, White: {white2}, Other: {other2}'.format(**data.colorCounts))
-    print('The percent fibrosis in relation to the red tissue is %{}'.format(data.pfibvred))
+    text = (
+        '{filename}\n'
+        'Pixels counts:\n'
+        '\tPass 1 (Filter): '
+            'Tissue: {tissueFilter}, '
+            'Stain: {stainFilter}, '
+            'Background: {whiteFilter}, '
+            'Other: {otherFilter}\n'
+        '\tPass 2 (Regression): '
+            'Background: {whiteReg}\n'
+        '\tPass 3 (KNN): '
+            'Tissue: {tissueKNN}, '
+            'Stain: {stainKNN}, '
+            'Background: {whiteKNN}, '
+            'Other: {otherKNN}\n'
+        '\tFinal: '
+            'Tissue: {tissueFinal}, '
+            'Stain: {stainFinal}, '
+            'Background: {whiteFinal}, '
+            'Other: {otherFinal}\n'
+        'The percent stained tissue in relation to the tissue is %{precStainVTissue}'
+        )
+    print(text.format(filename=filename,
+                      precStainVTissue=data['precStainVTissue'],
+                      **data['colorCounts']))
+    
 
 #saves the images generated by the analysis
-def saveOne(filename, savedir, data):
+def saveOne(filename, savedir, data, im):
     if savedir is None or len(savedir) == 0:
         return
     filename = filename.split('.')[0]
 
     savename = '{}/{}_{{}}.jpeg'.format(savedir,filename)
 
-    io.imsave(savename.format('original'), data.RGB)
+    im.save(savename.format('original'))
 
-    if settings.show_firstPass:
-        io.imsave(savename.format('RedMask1'), coverUnMasked(data.RGB, data.redMask1))
-        io.imsave(savename.format('BlueMask1'), coverUnMasked(data.RGB, data.blueMask1))
-        io.imsave(savename.format('WhiteMask1'), coverUnMasked(data.RGB, data.whiteMask1))
-        io.imsave(savename.format('OtherMask1'), coverUnMasked(data.RGB, data.otherMask1))
-
-    io.imsave(savename.format('RedMaskFinal'), coverUnMasked(data.RGB, data.redMask2))
-    io.imsave(savename.format('BlueMaskFinal'), coverUnMasked(data.RGB, data.blueMask2))
-    io.imsave(savename.format('WhiteMaskFinal'), coverUnMasked(data.RGB, data.whiteMask2))
-    io.imsave(savename.format('OtherMaskFinal'), coverUnMasked(data.RGB, data.otherMask2))
-
-    io.imsave(savename.format('BeautiyBlue'), img_as_uint(color.hsv2rgb(data.beautifyBlue)))
+    coverUnMasked(im, data['tissueMask'])\
+        .save(savename.format('TissueFinal'))
+    coverUnMasked(im, data['stainMask'])\
+        .save(savename.format('StainFinal'))
+    coverUnMasked(im, data['whiteMask'])\
+        .save(savename.format('BackgroundFinal'))
+    coverUnMasked(im, data['otherMask'])\
+        .save(savename.format('OtherFinal'))
+    
+    beautifyStain = beautify(data['stainMask'], im)
+    beautifyStain.save(savename.format('HighlightStain'))
 
 #plots the images generated by analysis
-def plotOne(filename, data):
-    if not settings.show_images:
-        return
+def plotOne(filename, data, im):
     ## Display orginal image
     plt.figure();
     plt.title(filename);
     plt.axis('off')
-    plt.imshow(data.RGB);
-
-    if settings.show_firstPass:
-        plt.figure(figsize = (1,2))
-        plt.subplot(1,2,1)
-
-        showMask(data.RGB, data.redMask1, 'Red Mask 1')
-        plt.subplot(1,2,2)
-        showMask(data.RGB, data.blueMask1, 'Blue Mask 1')
-
-        plt.figure(figsize = (1,2))
-        plt.subplot(1,2,1)
-        showMask(data.RGB, data.whiteMask1, 'White Mask 1')
-        plt.subplot(1,2,2)
-        showMask(data.RGB, data.otherMask1, 'Other Mask 1')
+    plt.imshow(im);
 
     plt.figure(figsize = (1,2))
     plt.subplot(1,2,1)
-    showMask(data.RGB, data.redMask2, 'Red Mask')
+    showMask(im, data['tissueMask'], 'Tissue')
     plt.subplot(1,2,2)
-    showMask(data.RGB, data.blueMask2, 'Blue Mask')
+    showMask(im, data['stainMask'], 'Stain')
 
     plt.figure(figsize = (1,2))
     plt.subplot(1,2,1)
-    showMask(data.RGB, data.whiteMask2, 'White Mask')
+    showMask(im, data['whiteMask'], 'Background')
     plt.subplot(1,2,2)
-    showMask(data.RGB, data.otherMask2, 'Other Mask')
+    showMask(im, data['otherMask'], 'Other')
 
     plt.figure()
-    plt.title('Beautify Fibrosis')
+    plt.title('Highlight Fibrosis')
     plt.axis('off')
-    plt.imshow(color.hsv2rgb(data.beautifyBlue))
-
-#process one file, dividing the file into blue (fibrosis), red (tissue), white, and unclassified
-def processOne(im):
-    RGB = np.asarray(im.convert('RGB'))
-    HSV = np.asarray(im.convert('HSV'))
-    LAB = color.rgb2lab(RGB)
-
-#    test = LAB.copy()
-#    test[...,0] = test[...,0]/100
-#    test[...,1] = (test[...,1]-test[...,1].min())/(test[...,1].max()-test[...,1].min())
-#    test[...,2] = (test[...,2]-test[...,2].min())/(test[...,2].max()-test[...,2].min())
-#    print(LAB[...,1].max(),LAB[...,1].min())
-#    print(LAB[...,2].max(),LAB[...,2].min())
-#    plt.figure()
-#    plt.imshow(test)
-
-    #apply color filters
-    whiteMask1, redMask1, blueMask1, otherMask1 = createColorMasks(HSV, RGB)
-    otherwhiteMask = findWhite(whiteMask1,redMask1,blueMask1,otherMask1,LAB)
-    otherMask = otherMask1 & np.logical_not(otherwhiteMask)
-    whiteMask = whiteMask1 | otherwhiteMask
-
-    #catagorize other
-    otherredMask, otherblueMask, otherotherMask = findBlueAndRed(otherwhiteMask,redMask1,blueMask1,otherMask,LAB)
-
-    redMask = redMask1 | otherredMask
-    blueMask = blueMask1 | otherblueMask
-
-    beautifyBlue = beautify(blueMask, HSV)
-    colorCounts = {'red1':np.sum(redMask1),'blue1':np.sum(blueMask1),
-                   'white1':np.sum(whiteMask1),'other1':np.sum(otherMask1),
-                   'red2':np.sum(redMask),'blue2':np.sum(blueMask),
-                   'white2':np.sum(whiteMask),'other2':np.sum(otherotherMask)
-                   }
-    # Calculate the area of the red pixels
-    redcount = np.sum(redMask)
-    bluecount = np.sum(blueMask)
-    pfibvred=100*(bluecount/(bluecount+redcount))
-
-    data = Data()
-    data.RGB = RGB
-    data.HSV = HSV
-    data.redMask1 = redMask1
-    data.blueMask1 = blueMask1
-    data.whiteMask1 = whiteMask1
-    data.otherMask1 = otherMask1
-    data.redMask2 = redMask
-    data.blueMask2 = blueMask
-    data.whiteMask2 = whiteMask
-    data.otherMask2 = otherotherMask
-    data.beautifyBlue = beautifyBlue
-    data.colorCounts = colorCounts
-    data.pfibvred = pfibvred
-    return data
-
-#gethers user input and processes all files, saving and ploting as requested
-def main():
-    root = tk.Tk()
-    root.withdraw()
-    filepaths =  filedialog.askopenfilenames(title='Select Files for Fibrosis')
-    if len(filepaths) == 0:
-        return
-    root = tk.Tk()
-    root.withdraw()
-    savefile = filedialog.asksaveasfile(title='Save Analysis to csv',defaultextension='.csv',filetypes=[('csv files', '.csv')])
-    if savefile is not None:
-        savefile.write('file name, % fibrosis, red count 1, blue count 1, white count 1, other count 1, red count 2, blue count 2, white count 2, other count 2\n')
-    savedir = None
-    if settings.save_images:
-        savedir = filedialog.askdirectory(title='Directory to save images')
+    beautifyStain = beautify(data['stainMask'], im)
+    plt.imshow(beautifyStain)
 
 
-    for filepath in filepaths:
-        im = Image.open(filepath)
 
-        filename = filepath.split('/')[-1]
-        data = processOne(im)
-
-        bluePix1 = data.RGB[data.blueMask1][:,2]
-        bluePix2 = data.RGB[data.blueMask2][:,2]
-#        plt.figure()
-#        plt.title(filename)
-#        plt.hist(bluePix1,alpha=.8)
-#        plt.hist(bluePix2,alpha=.8)
-
-        printTextOne(filename, data)
-        plotOne(filename, data)
-        saveOne(filename, savedir, data)
-
-        if savefile is not None:
-            savefile.write('{}, {}, {red1}, {blue1}, {white1}, {other1}, {red2}, {blue2}, {white2}, {other2}\n'.format(filename,data.pfibvred,**data.colorCounts))
-#    plt.show()
-    if savefile is not None:
-        savefile.close()
-
-if __name__ == "__main__":
-    main()

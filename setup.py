@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
 from setuptools import setup
 
-version = '1.0'
+version = '2.0.0'
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -15,8 +14,10 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(name='hundlab-AFAT',
     package_dir={'':'src'},
-    packages=['AFAT'],
-    scripts=['src/AutomatedFibrosisAnalysisToolkit.py'],
+    packages=['AFAT',
+              'AFAT.gui'],
+    scripts=['src/AutomatedFibrosisAnalysisToolkit.py',
+             'src/ConfigureColorRules.py'],
     version=version,
     description='Automated Fibrosis Analysis Toolkit: A tool to quantify the amount of fibrosis in Masson’s Trichrome stains',
     long_description=long_description,
@@ -27,4 +28,3 @@ setup(name='hundlab-AFAT',
     install_requires=install_requires,
     include_package_data=True,
     )
-
