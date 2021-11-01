@@ -14,9 +14,14 @@ warnings.filterwarnings('ignore')
 
 if __name__ == "__main__":
     try:
+        import tkinter as tk
         from AFAT.gui.config_color_rules import ConfigureColorsWidget
         
-        gui = ConfigureColorsWidget()        
+        root = tk.Tk()
+        root.withdraw()
+        gui = ConfigureColorsWidget(root)    
+        root.mainloop()
+        root.destroy()
 
         input('Press Enter to continue ...')
     except Exception as e:

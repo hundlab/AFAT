@@ -19,19 +19,18 @@ from .color_entry_widgets import HSVEntryWidget
 from .plot_masked_images import MaskShowTool, ComputeMasks, plotImage
 
 
-class ConfigureColorsWidget():
-    def __init__(self):
-        #tk.Frame
-        #tk.Frame.__init__(self, parent)
+class ConfigureColorsWidget(tk.Toplevel):
+    def __init__(self, master):
+        tk.Toplevel.__init__(self, master)
         #User created color rules
         #Start from default
         self.color_rules = dict(color_rules=deepcopy(settings['color_rules']))
         self.rulesChanged = False
         
         #Create main window
-        self.root = tk.Tk()
-        self.root.title('Color Rules Setup')
-        self.root.protocol("WM_DELETE_WINDOW", self.onClosing)
+#        self.root = tk.Tk()
+        self.title('Color Rules Setup')
+        self.protocol("WM_DELETE_WINDOW", self.onClosing)
         
         #Setup image plot window
         self.masks = ComputeMasks(color_rules=self.color_rules['color_rules'])
@@ -61,8 +60,8 @@ class ConfigureColorsWidget():
                                  masks=self.masks)
             toolbar.add_tool('Show Other', 'show_masks')
         
-        self.menu = tk.Menu(self.root)
-        self.root.config(menu=self.menu)
+        self.menu = tk.Menu(self)
+        self.config(menu=self.menu)
         
         #Add image open
         file_menu = tk.Menu(self.menu, tearoff=False)
@@ -86,35 +85,35 @@ class ConfigureColorsWidget():
         
         #Display Color rules
         rules = self.color_rules['color_rules']
-        self.background_rules = HSVEntryWidget(self.root,
+        self.background_rules = HSVEntryWidget(self,
                                                'Background',
                                                data=rules['background'])
         self.background_rules.pack(side=tk.TOP)
         self.background_rules.setCallback(lambda data: \
                                           self.onUpdate(data, 'background'))
         
-        self.tissue_rules = HSVEntryWidget(self.root, 
+        self.tissue_rules = HSVEntryWidget(self, 
                                            'Tissue',
                                            data=rules['tissue'])
         self.tissue_rules.pack(side=tk.TOP)        
         self.tissue_rules.setCallback(lambda data: \
                                       self.onUpdate(data, 'tissue'))
         
-        self.stain_rules = HSVEntryWidget(self.root, 
+        self.stain_rules = HSVEntryWidget(self, 
                                           'Stain',
                                           data=rules['stain'])
         self.stain_rules.pack(side=tk.TOP)
         self.stain_rules.setCallback(lambda data: \
                                      self.onUpdate(data, 'stain'))
             
-        self.statusbar = tk.Label(self.root,
+        self.statusbar = tk.Label(self,
                                   text="",
                                   bd=1,
                                   relief=tk.SUNKEN,
                                   anchor=tk.W)
         self.statusbar.pack(side=tk.BOTTOM, fill=tk.X)
         
-        self.root.mainloop()
+#        self.root.mainloop()
         
     def onClosing(self):
         if self.rulesChanged: 
@@ -126,7 +125,8 @@ class ConfigureColorsWidget():
             elif not res:
                 self.saveAction(saveAs=True)
         plt.close(self.im_fig)
-        self.root.destroy()
+        self.destroy()
+        self.quit()
 
     def openImageAction(self, event=None):
         image_filepath = filedialog.askopenfilename(title='Image file')
@@ -204,8 +204,8 @@ class ConfigureColorsWidget():
         
     def setStatusbar(self, text):
         self.statusbar.configure(text=text)
-        self.root.after_cancel(self.resetStatusbar)
-        self.root.after(3000, self.resetStatusbar)
+        self.after_cancel(self.resetStatusbar)
+        self.after(3000, self.resetStatusbar)
         
     def removeNullColorRules(self):
         self.color_rules['color_rules'] =\

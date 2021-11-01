@@ -15,11 +15,11 @@ if __name__ == "__main__":
         
         #Create main window
         root = tk.Tk()
-        root.title('Fibrosis Quantification Settup')
+        root.withdraw()
         gui = config_run.ConfigureRunWidget(root)
-        gui.pack(side="top", fill="both", expand=True)
         #Run eventloop and create GUI
         root.mainloop()
+        root.destroy()
         
         if gui.run_analysis:
             processAllFiles(gui.filepaths, 

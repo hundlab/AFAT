@@ -32,7 +32,7 @@ def processAllFiles(image_filepaths,
     savefile = None
     if save_res_filepath != '':
         savefile = open(save_res_filepath, 'w')
-        savefile.write(('file name, % fibrosis, Tissue count filter, '
+        savefile.write(('file name, % stain, Tissue count filter, '
                         'stain count filter, background count filter, '
                         'other count filter, background count regression, '
                         'Tissue count KNN, stain count KNN, background count KNN, '

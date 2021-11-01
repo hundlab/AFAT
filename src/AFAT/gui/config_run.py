@@ -13,9 +13,11 @@ import yaml
 
 from .. import settings
 
-class ConfigureRunWidget(tk.Frame):
-    def __init__(self, parent):
-        tk.Frame.__init__(self, parent)
+class ConfigureRunWidget(tk.Toplevel):
+    def __init__(self, master):
+        tk.Toplevel.__init__(self, master)
+        self.title('Fibrosis Quantification Settup')
+        self.protocol("WM_DELETE_WINDOW", self.quitAction)
        
         #Add directory filepaths input
         self.filepaths = []
@@ -171,4 +173,9 @@ class ConfigureRunWidget(tk.Frame):
             self.color_rules_filepath = None
         self.run_analysis = True
         
-        self.root.destroy()
+        self.destroy()
+        self.quit()
+        
+    def quitAction(self, event=None):
+        self.destroy()
+        self.quit()
