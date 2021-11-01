@@ -76,7 +76,7 @@ There were two primary aims in updating AFAT:
 
 ### Automated Fibrosis Analysis Toolkit
 
-![AFAT configure and run](./images/AFAT_configure_run.PNG)
+![Image AFAT configure and run](./images/AFAT_configure_run.PNG)
 
 This is the new configuration panel to select all of the inputs needed for AFAT to run the analysis.
 First, using `Choose Images` select any images you want to be analyzed in one batch. No special per
@@ -107,7 +107,7 @@ these images can be saved to be viewed latter.
 
 ### Configure Color Rules
 
-![Configuration menu for color rules](./images/color_rules_configure.PNG)
+![Image Configuration menu for color rules](./images/color_rules_configure.PNG)
 
 This is the main configuration menu for customizing the color rules. The configuration uses the HSV colorspace with all values being between 0 and 255. More information on HSV can be found online, but briefly: H refers to
 hue, the color; S refers to saturation, the intensity of the color (0 being no color/gray, 255 being intense/rich color); and V is called value, which is also related to color intensity with 0 being black and 255 being intense/rich color. Together S and V define color vs white vs black vs gray. Initially the default rules are loaded
@@ -116,7 +116,7 @@ existing rules may be removed by deleting the entries in both blanks. When makin
 the number entry box for your change to be applied (this will also be reflected in a status update in the
 bottom left-hand corner of the window).
 
-![Configuration display for color rules](./images/color_rules_view.jpg)
+![Image Configuration display for color rules](./images/color_rules_view.jpg)
 
 An image may be loaded using the file menu on the main configuration window. The loaded image will show up in
 this secondary viewing window with additional information about the color rules. First, the bottom left-hand
