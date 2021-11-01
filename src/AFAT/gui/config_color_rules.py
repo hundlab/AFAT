@@ -36,6 +36,7 @@ class ConfigureColorsWidget(tk.Toplevel):
         self.masks = ComputeMasks(color_rules=self.color_rules['color_rules'])
         with plt.rc_context({'toolbar':'toolmanager'}):
             self.im_fig, self.im_ax = plt.subplots()
+            self.im_fig.show()
             #Add toggles for showing masks
             toolmanager = self.im_fig.canvas.manager.toolmanager
             toolbar = self.im_fig.canvas.manager.toolbar
@@ -139,7 +140,8 @@ class ConfigureColorsWidget(tk.Toplevel):
                                          self.HSV,
                                          self.masks,
                                          ax=self.im_ax, 
-                                         imshow=self.im_show)                
+                                         imshow=self.im_show)
+                self.im_fig.show()
                 self.masks.setHSV(self.HSV)
                 self.masks.computeMasks()
             except(MemoryError):
