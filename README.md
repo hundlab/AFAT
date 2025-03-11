@@ -1,6 +1,6 @@
 # Automated Fibrosis Analysis Toolkit (AFAT)
 
-*This tool was documented in [our paper](http://doi.org/10.1016/j.mex.2019.11.028) on marcophage and fibrosis quantification*
+*This tool was documented in [our paper](http://doi.org/10.1016/j.mex.2019.11.028) on macrophage and fibrosis quantification*
 
 *Hundlab Website: [hundlab.org](http://hundlab.org/)*
 
@@ -20,9 +20,12 @@
     version.
 
 2.  Install AFAT by opening a cmd or powershell window and running
-    `py -m pip install hundlab-AFAT`, this should install AFAT and all of its dependancies.
-
-3.  Once AFAT has been installed it can be run via cmd, powershell or the start menu. To run
+    `py -m pip install hundlab-AFAT`, this should install AFAT and all of its dependencies.
+    * sklearn has been deprecated, so installation will likely produce an error here.
+        To avoid this, set the environment variable SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
+        For more information, see https://pypi.org/project/sklearn/
+      
+4.  Once AFAT has been installed it can be run via cmd, powershell or the start menu. To run
      type `AutomatedFibrosisAnalysisToolkit.py`. To create a desktop shortcut type
      `AutomatedFibrosisAnalysisToolkit.py` into the start menu select `Copy full path`, then on the 
      Desktop `right-click` -> `new` -> `new shortcut` and paste the path when it askes for a
@@ -46,10 +49,13 @@ After installation, the `ConfigureColorRules.py` tool can be run in the same man
     If it is installed correctly opening a terminal and typing `python --version` (in some 
     distributions such as Ubuntu the command is `python3`) should start a python prompt. It 
     may also be necessary to install Tkinter. On unbuntu the package is `python3-tk`.
+    * sklearn has been deprecated, so installation will likely produce an error here.
+        To avoid this, set the environment variable SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
+        For more information, see https://pypi.org/project/sklearn/
 
-2. Install AFAT using pip: `python -m pip install hundlab-AFAT`
+3. Install AFAT using pip: `python -m pip install hundlab-AFAT`
 
-3. To run AFAT use the command `AutomatedFibrosisAnalysisToolkit.py`
+4. To run AFAT use the command `AutomatedFibrosisAnalysisToolkit.py`
 
 After installation, the `ConfigureColorRules.py` tool can be run in the same manner as AFAT.
 
